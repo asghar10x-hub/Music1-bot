@@ -1,4 +1,4 @@
-name: Daily Music Bot
+name: Daily Arabic Music Bot
 
 on:
   schedule:
@@ -12,10 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - run: node bot.js
+      - name: Run bot
+        run: node bot.js
