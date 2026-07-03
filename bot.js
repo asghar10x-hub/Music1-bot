@@ -76,27 +76,26 @@ async function sendToTelegram(text, imageUrl) {
 
 // اجرای اصلی
 async function run() {
+  console.log("BOT STARTED");
+
   try {
     const article = await getNews();
+    console.log("ARTICLE FOUND:", article?.title);
 
-    if (!article) {
-      console.log("No article, skipping run");
-      return;
-    }
+    if (!article) return;
 
     const post = await generateText(article);
+    console.log("POST GENERATED");
 
-    const image =
-      article.image ||
-      article.urlToImage ||
-      null;
+    const image = article.image || article.urlToImage || null;
+
+    console.log("SENDING TO TELEGRAM...");
 
     await sendToTelegram(post, image);
 
-    console.log("Post sent successfully");
+    console.log("DONE SUCCESSFULLY");
   } catch (err) {
-    console.error("BOT ERROR:", err.message);
+    console.error("ERROR:", err.response?.data || err.message);
   }
 }
-
 run();
