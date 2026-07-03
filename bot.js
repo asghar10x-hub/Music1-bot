@@ -37,15 +37,15 @@ async function generateText(article) {
 }
 
 // ارسال به تلگرام
-async function sendToTelegram(text) {
-  const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/sendMessage`;
+async function sendToTelegram(text, imageUrl) {
+  const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/sendPhoto`;
 
   await axios.post(url, {
     chat_id: config.CHAT_ID,
-    text: text
+    photo: imageUrl,
+    caption: text
   });
 }
-
 async function run() {
   const article = await getNews();
   const post = await generateText(article);
