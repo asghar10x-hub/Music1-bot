@@ -1,22 +1,38 @@
 import axios from "axios";
 import config from "./config.js";
 
-// گرفتن خبر واقعی موسیقی عربی
+// گرفتن خبر
 async function getNews() {
-  const url = `https://gnews.io/api/v4/search?q=music arabic OR arabic song&lang=ar&max=1&token=${config.GNEWS_API_KEY}`;
+  const url = `https://gnews.io/api/v4/search?q=arabic%20music&lang=ar&max=1&token=${config.GNEWS_API_KEY}`;
   const res = await axios.get(url);
-  return res.data.articles[0];
+
+  const articles = res.data?.articles;
+
+  if (!articles || articles.length === 0) {
+    console.log("No articles found");
+    return null;
+  }
+
+  return articles[0];
 }
 
 // تولید متن عربی با AI
 async function generateText(article) {
+  if (!article || !article.title) {
+    throw new Error("Invalid article");
+  }
+
   const prompt = `
-اكتب منشور أخبار موسيقى عربي احترافي:
+اكتب منشور احترافي عن خبر موسيقي عربي بأسلوب إعلامي مثل Billboard Arabia:
 
-العنوان: ${article.title}
-الوصف: ${article.description}
+العنوان: ${article.title || ""}
+الوصف: ${article.description || ""}
 
-اكتب بأسلوب إعلامي جذاب + تحليل + هاشتاغات في النهاية.
+النص يجب أن يكون:
+- باللغة العربية
+- احترافي وجذاب
+- تحليل بسيط
+- مع هاشتاغات في النهاية
 `;
 
   const res = await axios.post(
@@ -36,7 +52,7 @@ async function generateText(article) {
   return res.data.choices[0].message.content;
 }
 
-// ارسال به تلگرام
+// ارسال به تلگرام (عکس + متن)
 async function sendToTelegram(text, imageUrl) {
   if (imageUrl) {
     await axios.post(
@@ -57,13 +73,30 @@ async function sendToTelegram(text, imageUrl) {
     );
   }
 }
+
+// اجرای اصلی
 async function run() {
-  const article = await getNews();
-  const post = await generateText(article);
+  try {
+    const article = await getNews();
 
-  const image =
-    article.image || article.urlToImage || null;
+    if (!article) {
+      console.log("No article, skipping run");
+      return;
+    }
 
-  await sendToTelegram(post, image);
+    const post = await generateText(article);
+
+    const image =
+      article.image ||
+      article.urlToImage ||
+      null;
+
+    await sendToTelegram(post, image);
+
+    console.log("Post sent successfully");
+  } catch (err) {
+    console.error("BOT ERROR:", err.message);
+  }
 }
+
 run();
