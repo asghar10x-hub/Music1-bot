@@ -1,0 +1,22 @@
+name: Daily Telegram Bot
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # هر روز ساعت 9 صبح UTC
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Run bot script
+        run: node bot.js
