@@ -38,18 +38,32 @@ async function generateText(article) {
 
 // ارسال به تلگرام
 async function sendToTelegram(text, imageUrl) {
-  const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/sendPhoto`;
-
-  await axios.post(url, {
-    chat_id: config.CHAT_ID,
-    photo: imageUrl,
-    caption: text
-  });
+  if (imageUrl) {
+    await axios.post(
+      `https://api.telegram.org/bot${config.BOT_TOKEN}/sendPhoto`,
+      {
+        chat_id: config.CHAT_ID,
+        photo: imageUrl,
+        caption: text
+      }
+    );
+  } else {
+    await axios.post(
+      `https://api.telegram.org/bot${config.BOT_TOKEN}/sendMessage`,
+      {
+        chat_id: config.CHAT_ID,
+        text: text
+      }
+    );
+  }
 }
 async function run() {
   const article = await getNews();
   const post = await generateText(article);
-  await sendToTelegram(post);
-}
 
+  const image =
+    article.image || article.urlToImage || null;
+
+  await sendToTelegram(post, image);
+}
 run();
